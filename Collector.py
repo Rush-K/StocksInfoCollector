@@ -45,7 +45,15 @@ class Collector:
                                    수정주가구분=1,
                                    output="주식일봉차트조회",
                                    next=0)
-        #데이터.to_excel("실험.xlsx")
+        데이터.to_excel("csvData/" + 종목명 + "_최근1달일봉.xlsx")
 
+    def 신용매매동향데이터가져오기(self, 종목명):
+        데이터 = self.kiwoom.block_request("opt10013",
+                                  종목코드=self.종목딕셔너리[종목명],
+                                  일자="20210804",
+                                  조회구분="1", # 조회구분 1 : 융자, 2 : 대주
+                                  output="신용매매동향",
+                                  next=0)
 
+        데이터.to_excel("csvData/" + 종목명 + "_신용매매동향.xlsx")
 
