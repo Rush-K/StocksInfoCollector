@@ -1,6 +1,6 @@
-# StocksInfoCollector - 키움 Open API를 이용한 주식 정보 수집 프로그램
+# StocksInfoCollector - 키움 Open API를 이용한 주식 정보 수집 서버
 
-키움 Open API를 이용하여 원하는 주식 종목의 데이터를 수집하고 데이터베이스에 저장합니다.
+키움 Open API를 이용하여 원하는 주식 종목의 데이터를 수집 및 가공하고 데이터베이스에 저장합니다.
 
 ### Prerequisites
 
@@ -10,6 +10,7 @@
 * Kiwoom Open-API 설치
 * Python Anaconda3 32Bit
 * MySQL Database 
+* Flask 
 
 ## Built With
 
