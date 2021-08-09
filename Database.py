@@ -37,8 +37,12 @@ class Database:
         sql = "select * from stock_code"
         self.cursor.execute(sql)
 
-        result = self.cursor.fetchall()
-        print(result)
+        result = {}
+
+        for row in self.cursor:
+            result[row[0]] = row[1]
+
+        return result
 
     def 일봉데이터전체조회(self):
         sql = "select * from daily_candle"
