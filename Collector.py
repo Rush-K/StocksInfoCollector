@@ -1,4 +1,8 @@
+# 키움 API 호출로 필요한 데이터를 가져오는 모듈
+
+import pandas
 from pykiwoom.kiwoom import *
+from pandas import DataFrame
 import datetime
 
 class Collector:
@@ -45,7 +49,11 @@ class Collector:
                                    수정주가구분=1,
                                    output="주식일봉차트조회",
                                    next=0)
-        데이터.to_excel("csvData/" + 종목명 + "_최근1달일봉.xlsx")
+
+        데이터 = DataFrame(데이터, columns=['일자', '현재가', '고가', '저가', '거래량'])
+        데이터['일자'] = pandas.to_datetime(데이터['일자'])
+        데이터 = 데이터.astype({'현재가': 'int', '고가': 'int', '저가': 'int', '거래량': 'int'})
+        return 데이터
 
     def 신용매매동향데이터가져오기(self, 종목명):
         데이터 = self.kiwoom.block_request("opt10013",

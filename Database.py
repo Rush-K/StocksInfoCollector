@@ -1,7 +1,11 @@
+# Mysql 데이터베이스
+
 import MySQLdb
+from sqlalchemy import create_engine # dataframe 저장할 때만 사용 : MySQLdb 보다 속도가 느림
 
 class Database:
 
+    engine = None
     connect = None
     cursor = None
 
@@ -14,6 +18,7 @@ class Database:
             charset='utf8mb4')
 
         self.cursor = self.connect.cursor()
+        self.engine = create_engine("mysql+mysqldb://root:" + "root" + "@localhost/stock?charset=utf8mb4", encoding='utf-8')
 
     ## 데이터 삽입 ##
     def 종목정보저장(self, **종목딕셔너리):
@@ -27,10 +32,15 @@ class Database:
                 update = update + 1
             except MySQLdb.IntegrityError as e:
                 pass
+            except MySQLdb.ProgrammingError as e:
+                pass
 
         self.connect.commit()
         print("종목 딕셔너리 DB 저장 완료, 총 " + str(total) + "종목 중 " + str(update) + "개 추가 완료")
 
+    def 일봉데이터저장(self, 종목코드, 데이터):
+        데이터.to_sql('daily_candle_{}'.format(종목코드), self.engine, if_exists='replace', index=False)
+        print(종목코드 + " 저장 완료")
 
     ## 데이터 조회 ##
     def 종목정보조회(self):
@@ -43,16 +53,3 @@ class Database:
             result[row[0]] = row[1]
 
         return result
-
-    def 일봉데이터전체조회(self):
-        sql = "select * from daily_candle"
-        self.cursor.execute(sql)
-
-        result = self.cursor.fetchall()
-        print(result)
-
-
-    def disconnect(self):
-        self.connect.close()
-
-
