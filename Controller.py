@@ -1,10 +1,19 @@
+# API 서버
+
 from flask import Response, Flask
 from flask_restful import Resource, Api
 from functools import wraps
-import Database
+
 import json
 
+import Database
+import Collector
+
 db = Database.Database()
+
+collector = Collector.Collector()
+collector.종목딕셔너리 = db.종목정보조회()
+
 app = Flask(__name__)
 api = Api(app)
 
@@ -21,7 +30,14 @@ class StockList(Resource):
     def get(self):
         return db.종목정보조회()
 
+class StockDailyCandle(Resource):
+    def post(self, stockname):
+        collector.로그인()
+        데이터 = collector.최근1달일봉가져오기(stockname)
+        return 데이터
+
 api.add_resource(StockList, '/stocklist')
+api.add_resource(StockDailyCandle, '/stockdailycandle/<stockname>')
 
 if __name__ == '__main__':
     app.run(debug=True)
