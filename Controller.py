@@ -7,12 +7,11 @@ from functools import wraps
 import json
 
 import Database
-import Collector
+import DataProcessor
 
 db = Database.Database()
+dp = DataProcessor.DataProcessor()
 
-collector = Collector.Collector()
-collector.종목딕셔너리 = db.종목정보조회()
 
 app = Flask(__name__)
 api = Api(app)
@@ -31,13 +30,16 @@ class StockList(Resource):
         return db.종목정보조회()
 
 class StockDailyCandle(Resource):
-    def post(self, stockname):
-        collector.로그인()
-        데이터 = collector.최근1달일봉가져오기(stockname)
-        return 데이터
+    def get(self, stockcode):
+        return db.종목일봉데이터조회(stockcode).to_json(force_ascii=False)
+
+class StockLowPriceGraph(Resource):
+    def get(self, stockcode, dates):
+        return dp.기간범위내최저가기울기(stockcode, int(dates))
 
 api.add_resource(StockList, '/stocklist')
-api.add_resource(StockDailyCandle, '/stockdailycandle/<stockname>')
+api.add_resource(StockDailyCandle, '/stockdailycandle/<stockcode>')
+api.add_resource(StockLowPriceGraph, '/stockdailycandle/<stockcode>/<dates>')
 
 if __name__ == '__main__':
     app.run(debug=True)

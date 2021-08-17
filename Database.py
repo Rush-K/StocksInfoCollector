@@ -1,6 +1,7 @@
 # Mysql 데이터베이스
 
 import MySQLdb
+from pandas import DataFrame
 from sqlalchemy import create_engine # dataframe 저장할 때만 사용 : MySQLdb 보다 속도가 느림
 
 class Database:
@@ -52,4 +53,12 @@ class Database:
         for row in self.cursor:
             result[row[0]] = row[1]
 
+        return result
+
+    def 종목일봉데이터조회(self, 종목코드):
+        sql = "select * from daily_candle_{}".format(종목코드)
+        self.cursor.execute(sql)
+
+        result = DataFrame(self.cursor)
+        result.columns = ["일자", "현재가", "고가", "저가", "거래량"]
         return result
