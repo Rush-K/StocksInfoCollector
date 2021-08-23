@@ -18,7 +18,10 @@ collector.로그인()
 collector.종목사전생성()
 db.종목정보저장(**collector.종목딕셔너리)
 
-# 종목별 일봉데이터 DB 저장
+# 일일 지수 데이터 DB 저장
+db.지수데이터저장(collector.지수가져오기())
+
+# 종목별 일봉데이터, 신용데이터 DB 저장
 for 종목명 in stockList:
     데이터 = pd.concat([collector.일봉가져오기(종목명), collector.신용매매동향가져오기(종목명)], axis=1)
     db.종목데이터저장(collector.종목딕셔너리[종목명], 데이터)
