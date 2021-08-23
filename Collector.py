@@ -10,11 +10,15 @@ class Collector:
     ####### 변수 #######
     kiwoom = None
     종목딕셔너리 = None
+    오늘날짜 = None
 
     ####### 함수 #######
     def __init__(self):
         self.kiwoom = Kiwoom()
         self.종목딕셔너리 = {}
+        self.오늘날짜 = datetime.datetime.now()
+        #self.오늘날짜 -= datetime.timedelta(days=1)
+        self.오늘날짜 = self.오늘날짜.strftime("%Y%m%d")
 
     def 로그인(self):
         self.kiwoom.CommConnect(block=True)
@@ -39,13 +43,10 @@ class Collector:
 
         print(self.종목딕셔너리)
 
-    def 최근1달일봉가져오기(self, 종목명):
-        오늘날짜 = datetime.datetime.now()
-        오늘날짜 = 오늘날짜.strftime("%Y%m%d")
-
+    def 일봉가져오기(self, 종목명):
         데이터 = self.kiwoom.block_request("opt10081",
                                    종목코드=self.종목딕셔너리[종목명],
-                                   기준일자=오늘날짜,
+                                   기준일자=self.오늘날짜,
                                    수정주가구분=1,
                                    output="주식일봉차트조회",
                                    next=0)
@@ -55,13 +56,25 @@ class Collector:
         데이터 = 데이터.astype({'현재가': 'int', '고가': 'int', '저가': 'int', '거래량': 'int'})
         return 데이터
 
-    def 신용매매동향데이터가져오기(self, 종목명):
-        데이터 = self.kiwoom.block_request("opt10013",
+    def 신용매매동향가져오기(self, 종목명):
+        융자잔고데이터 = self.kiwoom.block_request("opt10013",
                                   종목코드=self.종목딕셔너리[종목명],
-                                  일자="20210804",
-                                  조회구분="1", # 조회구분 1 : 융자, 2 : 대주
+                                  일자=self.오늘날짜,
+                                  조회구분="1", # 조회구분 1 : 융자, 2 : 대주(공매도)
                                   output="신용매매동향",
                                   next=0)
 
-        데이터.to_excel("csvData/" + 종목명 + "_신용매매동향.xlsx")
+        잔고데이터 = DataFrame(융자잔고데이터, columns=['잔고'])
+        잔고데이터.columns = ['융자잔고']
+
+        대주잔고데이터 = self.kiwoom.block_request("opt10013",
+                                  종목코드=self.종목딕셔너리[종목명],
+                                  일자=self.오늘날짜,
+                                  조회구분="2", # 조회구분 1 : 융자, 2 : 대주(공매도)
+                                  output="신용매매동향",
+                                  next=0)
+
+        잔고데이터['대주잔고'] = DataFrame(대주잔고데이터, columns=['잔고'])
+
+        return 잔고데이터
 
