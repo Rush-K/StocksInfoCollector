@@ -1,6 +1,6 @@
 # 키움 API 호출로 필요한 데이터를 가져오는 모듈
 
-import pandas
+import pandas as pd
 from pykiwoom.kiwoom import *
 from pandas import DataFrame
 import datetime
@@ -43,6 +43,28 @@ class Collector:
 
         print(self.종목딕셔너리)
 
+    def 지수가져오기(self):
+        코스피 = self.kiwoom.block_request("opt20003",
+                                   업종코드="001",
+                                   output="KOSPI지수",
+                                   next=0)
+
+        코스닥 = self.kiwoom.block_request("opt20003",
+                                        업종코드="101",
+                                        output="KOSDAQ지수",
+                                        next=0)
+
+        코스피 = DataFrame(코스피.head(1), columns=['현재가', '전일대비'])
+        코스피.columns = ['KOSPI현재가', 'KOSPI전일대비']
+        코스닥 = DataFrame(코스닥.head(1), columns=['현재가', '전일대비'])
+        코스닥.columns = ['KOSDAQ현재가', 'KOSDAQ전일대비']
+
+        지수데이터 = pd.concat([코스피.head(1), 코스닥.head(1)], axis=1)
+        지수데이터.insert(0, '일자', self.오늘날짜)
+        지수데이터['일자'] = pd.to_datetime(지수데이터['일자'])
+
+        return 지수데이터
+
     def 일봉가져오기(self, 종목명):
         데이터 = self.kiwoom.block_request("opt10081",
                                    종목코드=self.종목딕셔너리[종목명],
@@ -52,8 +74,9 @@ class Collector:
                                    next=0)
 
         데이터 = DataFrame(데이터, columns=['일자', '현재가', '고가', '저가', '거래량'])
-        데이터['일자'] = pandas.to_datetime(데이터['일자'])
+        데이터['일자'] = pd.to_datetime(데이터['일자'])
         데이터 = 데이터.astype({'현재가': 'int', '고가': 'int', '저가': 'int', '거래량': 'int'})
+
         return 데이터
 
     def 신용매매동향가져오기(self, 종목명):
