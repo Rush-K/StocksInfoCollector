@@ -1,6 +1,5 @@
 # 키움 API 호출로 필요한 데이터를 가져오는 모듈
 
-import pandas as pd
 from pykiwoom.kiwoom import *
 from pandas import DataFrame
 import datetime
@@ -41,7 +40,7 @@ class Collector:
         for i in 코스닥종목코드리스트:
             self.종목딕셔너리[self.kiwoom.GetMasterCodeName(i)] = i
 
-        print(self.종목딕셔너리)
+        print("종목딕셔너리 생성 완료")
 
     def 지수가져오기(self):
         코스피 = self.kiwoom.block_request("opt20003",

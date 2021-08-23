@@ -1,7 +1,7 @@
 # Mysql 데이터베이스
 
 import MySQLdb
-import sqlalchemy.exc
+import pandas
 from pandas import DataFrame
 from sqlalchemy import create_engine # dataframe 저장할 때만 사용 : MySQLdb 보다 속도가 느림
 
@@ -93,6 +93,25 @@ class Database:
             result[row[0]] = row[1]
 
         return result
+
+    def 분석가능종목조회(self):
+        sql = "select table_name from information_schema.tables where table_schema='stock'"
+        self.cursor.execute(sql)
+        테이블목록 = DataFrame(self.cursor)
+        테이블목록 = 테이블목록[테이블목록[0].str.contains("daily_")]
+        테이블목록 = 테이블목록[테이블목록[0] != "daily_index"]
+        테이블목록.columns = ['종목코드']
+        테이블목록['종목코드'] = 테이블목록['종목코드'].str.replace('daily_', '')
+
+        result = DataFrame()
+
+        for 종목코드 in 테이블목록['종목코드']:
+            sql = "select s_name from stock_code where s_code='{}'".format(종목코드)
+            self.cursor.execute(sql)
+            result = pandas.concat([result, DataFrame({'종목명': [DataFrame(self.cursor).iloc[0, 0]], '종목코드': [종목코드]})], ignore_index=True)
+
+        return result
+
 
     def 종목일봉데이터조회(self, 종목코드):
         sql = "select 일자, 현재가, 고가, 저가, 거래량 from daily_{}".format(종목코드)
