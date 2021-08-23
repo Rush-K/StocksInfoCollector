@@ -1,6 +1,7 @@
 # Mysql 데이터베이스
 
 import MySQLdb
+import sqlalchemy.exc
 from pandas import DataFrame
 from sqlalchemy import create_engine # dataframe 저장할 때만 사용 : MySQLdb 보다 속도가 느림
 
@@ -39,9 +40,26 @@ class Database:
         self.connect.commit()
         print("종목 딕셔너리 DB 저장 완료, 총 " + str(total) + "종목 중 " + str(update) + "개 추가 완료")
 
-    def 일봉데이터저장(self, 종목코드, 데이터):
-        데이터.to_sql('daily_candle_{}'.format(종목코드), self.engine, if_exists='replace', index=False)
-        print(종목코드 + " 저장 완료")
+    def 종목데이터저장(self, 종목코드, 데이터):
+        print("daily_{} 테이블 처리중..".format(종목코드))
+
+        try:
+            sql = "select * from daily_{}".format(종목코드)
+            self.cursor.execute(sql)
+            기존데이터 = DataFrame(self.cursor)
+            데이터기준 = 기존데이터[0].max() < 데이터['일자']
+            데이터 = 데이터[데이터기준]
+            if 데이터.empty:
+                print("추가할 데이터가 없습니다.")
+            else:
+                데이터.to_sql('daily_{}'.format(종목코드), self.engine, if_exists='append', index=False)
+                print("새로운 데이터 발견, 추가중..")
+            print("daily_{} 테이블 업데이트 완료".format(종목코드))
+        except MySQLdb.ProgrammingError as e:
+            데이터.to_sql('daily_{}'.format(종목코드), self.engine, if_exists='append', index=False)
+            sql = "alter table daily_{} add primary key(일자)".format(종목코드)
+            self.cursor.execute(sql)
+            print("daily_{} 신규 테이블 생성 후 저장 완료".format(종목코드))
 
     ## 데이터 조회 ##
     def 종목정보조회(self):
