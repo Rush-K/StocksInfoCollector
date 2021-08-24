@@ -2,6 +2,7 @@
 
 from flask import Response, Flask
 from flask_restful import Resource, Api
+from flask_cors import CORS
 from functools import wraps
 
 import json
@@ -14,6 +15,7 @@ dp = DataProcessor.DataProcessor()
 
 
 app = Flask(__name__)
+CORS(app, resources={r'*': {'origins': 'http://localhost:3000'}})
 api = Api(app)
 
 def as_json(f): #한글 깨짐 방지 + json 데코레이터
@@ -24,17 +26,38 @@ def as_json(f): #한글 깨짐 방지 + json 데코레이터
         return Response(res, content_type='application/json; charset=utf-8')
     return decorated_function
 
+# KOSPI, KOSDAQ 지수 정보 가져오기 API
+class Index(Resource):
+    @as_json
+    def get(self):
+        df = db.최근1일지수데이터조회().to_json(orient='records', force_ascii=False, date_format='iso')
+        parsed = json.loads(df)
+        return parsed
+
 # 주식 종목 리스트 조회 API
 class StockList(Resource):
     @as_json
     def get(self):
         return db.종목정보조회()
 
+# 분석 가능 종목 조회 API
+class AvailableStockList(Resource):
+    @as_json
+    def get(self):
+        df = db.분석가능종목조회().to_json(orient='records', force_ascii=False, date_format='iso')
+        parsed = json.loads(df)
+        return parsed
+
+# 종목 코드로 종목명 가져오기 API
+class StockName(Resource):
+    def get(self, stockcode):
+        return db.종목명조회(stockcode)
+
 # 일봉데이터 조회 API
 class StockDailyCandle(Resource):
     @as_json
     def get(self, stockcode):
-        df = db.종목일봉데이터조회(stockcode).to_json(orient='index', force_ascii=False, date_format='iso')
+        df = db.종목일봉데이터조회(stockcode).to_json(orient='records', force_ascii=False, date_format='iso')
         parsed = json.loads(df)
         return parsed
 
@@ -45,7 +68,10 @@ class TriangularConvergence(Resource):
         result = {'topprice': dp.기간범위내고가기울기(stockcode, int(dates)), 'lowprice': dp.기간범위내저가기울기(stockcode, int(dates))}
         return result
 
+api.add_resource(Index, '/index')
 api.add_resource(StockList, '/stocklist')
+api.add_resource(AvailableStockList, '/availablestocklist')
+api.add_resource(StockName, '/stockname/<stockcode>')
 api.add_resource(StockDailyCandle, '/stockdailycandle/<stockcode>')
 api.add_resource(TriangularConvergence, '/stockdailycandle/triangularconvergence/<stockcode>/<dates>')
 
