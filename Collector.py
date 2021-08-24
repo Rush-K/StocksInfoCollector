@@ -72,9 +72,9 @@ class Collector:
                                    output="주식일봉차트조회",
                                    next=0)
 
-        데이터 = DataFrame(데이터, columns=['일자', '현재가', '고가', '저가', '거래량'])
+        데이터 = DataFrame(데이터, columns=['일자', '현재가', '시가', '고가', '저가', '거래량'])
         데이터['일자'] = pd.to_datetime(데이터['일자'])
-        데이터 = 데이터.astype({'현재가': 'int', '고가': 'int', '저가': 'int', '거래량': 'int'})
+        데이터 = 데이터.astype({'현재가': 'int', '고가': 'int', '시가': 'int', '저가': 'int', '거래량': 'int'})
 
         return 데이터
 
