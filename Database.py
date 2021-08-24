@@ -83,6 +83,13 @@ class Database:
             print("daily_index 신규 테이블 생성 후 저장 완료")
 
     ## 데이터 조회 ##
+    def 종목명조회(self, 종목코드):
+        sql = "select s_name from stock_code where s_code='{}'".format(종목코드)
+        self.cursor.execute(sql)
+
+        for row in self.cursor:
+            return row[0]
+
     def 종목정보조회(self):
         sql = "select * from stock_code"
         self.cursor.execute(sql)
@@ -108,17 +115,16 @@ class Database:
         for 종목코드 in 테이블목록['종목코드']:
             sql = "select s_name from stock_code where s_code='{}'".format(종목코드)
             self.cursor.execute(sql)
-            result = pandas.concat([result, DataFrame({'종목명': [DataFrame(self.cursor).iloc[0, 0]], '종목코드': [종목코드]})], ignore_index=True)
+            result = pandas.concat([result, DataFrame({'sname': [DataFrame(self.cursor).iloc[0, 0]], 'scode': [종목코드]})], ignore_index=True)
 
         return result
 
-
     def 종목일봉데이터조회(self, 종목코드):
-        sql = "select 일자, 현재가, 고가, 저가, 거래량 from daily_{}".format(종목코드)
+        sql = "select 일자, 시가, 고가, 저가, 현재가 from daily_{}".format(종목코드)
         self.cursor.execute(sql)
 
         result = DataFrame(self.cursor)
-        result.columns = ["일자", "현재가", "고가", "저가", "거래량"]
+        result.columns = ["일자", "시가", "고가", "저가", "현재가"]
         return result
 
     def 종목신용데이터조회(self, 종목코드):
@@ -127,4 +133,14 @@ class Database:
 
         result = DataFrame(self.cursor)
         result.columns = ["일자", "융자잔고", "대주잔고"]
+        return result
+
+    def 최근1일지수데이터조회(self):
+        sql = "select * from daily_index"
+        self.cursor.execute(sql)
+
+        result = DataFrame(self.cursor)
+        최근1일기준 = result[0].max() == result[0]
+        result = result[최근1일기준]
+        result.columns = ["day", "KOSPIprice", "KOSPIctpd", "KOSDAQprice", "KOSDAQctpd"]
         return result
