@@ -56,8 +56,8 @@ class StockName(Resource):
 # 일봉데이터 조회 API
 class StockDailyCandle(Resource):
     @as_json
-    def get(self, stockcode):
-        df = db.종목일봉데이터조회(stockcode).to_json(orient='records', force_ascii=False, date_format='iso')
+    def get(self, stockcode, dates):
+        df = dp.기간범위내일봉데이터(stockcode, int(dates)).to_json(orient='records', force_ascii=False, date_format='iso')
         parsed = json.loads(df)
         return parsed
 
@@ -74,7 +74,7 @@ api.add_resource(Index, '/index')
 api.add_resource(StockList, '/stocklist')
 api.add_resource(AvailableStockList, '/availablestocklist')
 api.add_resource(StockName, '/stockname/<stockcode>')
-api.add_resource(StockDailyCandle, '/stockdailycandle/<stockcode>')
+api.add_resource(StockDailyCandle, '/stockdailycandle/<stockcode>/<dates>')
 api.add_resource(TriangularConvergence, '/stockdailycandle/triangularconvergence/<stockcode>/<dates>')
 
 if __name__ == '__main__':
