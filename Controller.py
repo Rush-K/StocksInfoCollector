@@ -65,7 +65,9 @@ class StockDailyCandle(Resource):
 class TriangularConvergence(Resource):
     @as_json
     def get(self, stockcode, dates):
-        result = {'topprice': dp.기간범위내고가기울기(stockcode, int(dates)), 'lowprice': dp.기간범위내저가기울기(stockcode, int(dates))}
+        최고가시작점, 최고가끝점 = dp.기간범위내고가기울기(stockcode, int(dates))
+        최저가시작점, 최저가끝점 = dp.기간범위내저가기울기(stockcode, int(dates))
+        result = {"topprice": [str(최고가시작점), str(최고가끝점)], "lowprice": [str(최저가시작점), str(최저가끝점)]}
         return result
 
 api.add_resource(Index, '/index')
