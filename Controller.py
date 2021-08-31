@@ -70,12 +70,24 @@ class TriangularConvergence(Resource):
         result = {"topprice": [str(최고가시작점), str(최고가끝점)], "lowprice": [str(최저가시작점), str(최저가끝점)]}
         return result
 
+# 신용데이터 조회 API
+class CreditTrading(Resource):
+    @as_json
+    def get(self, type, stockcode, dates):
+        if int(type) == 1:
+            df = dp.널값정리된신용데이터(stockcode, int(dates))[['일자', '대주잔고']].to_json(orient='records', force_ascii=False, date_format='iso')
+        elif int(type) == 0:
+            df = dp.널값정리된신용데이터(stockcode, int(dates))[['일자', '융자잔고']].to_json(orient='records', force_ascii=False, date_format='iso')
+        parsed = json.loads(df)
+        return parsed
+
 api.add_resource(Index, '/index')
 api.add_resource(StockList, '/stocklist')
 api.add_resource(AvailableStockList, '/availablestocklist')
 api.add_resource(StockName, '/stockname/<stockcode>')
 api.add_resource(StockDailyCandle, '/stockdailycandle/<stockcode>/<dates>')
 api.add_resource(TriangularConvergence, '/stockdailycandle/triangularconvergence/<stockcode>/<dates>')
+api.add_resource(CreditTrading, '/credittrading/<type>/<stockcode>/<dates>')
 
 if __name__ == '__main__':
     app.run(debug=True)
