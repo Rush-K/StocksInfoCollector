@@ -20,6 +20,11 @@ class DataProcessor:
         일봉데이터.sort_values(by=['일자'], inplace=True, ascending=False)
         return 일봉데이터.head(일수)
 
+    def 널값정리된신용데이터(self, 종목코드, 일수):
+        신용데이터 = self.데이터베이스.종목신용데이터조회(종목코드)
+        신용데이터 = 신용데이터.fillna(0)
+        return 신용데이터.head(일수)
+
     def 기간범위내고가기울기(self, 종목코드, 일수):
         일봉데이터 = self.기간범위내일봉데이터(종목코드, 일수)
         일봉데이터 = 일봉데이터.iloc[:,[2]].values

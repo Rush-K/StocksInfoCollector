@@ -128,7 +128,7 @@ class Database:
         return result
 
     def 종목신용데이터조회(self, 종목코드):
-        sql = "select 일자, 융자잔고, 대주잔고 from daily_{}".format(종목코드)
+        sql = "select 일자, 융자잔고, 대주잔고 from daily_{} order by 일자 desc".format(종목코드)
         self.cursor.execute(sql)
 
         result = DataFrame(self.cursor)
