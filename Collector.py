@@ -97,6 +97,7 @@ class Collector:
                                   next=0)
 
         잔고데이터['대주잔고'] = DataFrame(대주잔고데이터, columns=['잔고'])
+        잔고데이터 = 잔고데이터.astype({'융자잔고': 'int', '대주잔고': 'int'})
 
         return 잔고데이터
 
